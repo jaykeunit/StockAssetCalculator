@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+allprojects {
+  tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
+  }
+}
+
+dependencies {
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+    testCompile "org.powermock:powermock-mockito-release-full:1.6.1"
+}
+
+repositories {
+  mavenCentral()
+    jcenter()
+}
+
+jacocoTestReport {
+    doFirst{
+        classDirectories = fileTree(
+					dir: './build/classes/main/calculator',
+					excludes: ['**/ui/*.class']
+				)
+    }
+
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "build/reports/coverageHtml"
+    }
+}
+
+task(runui, dependsOn: 'classes', type: JavaExec) {
+  
+	main = 'calculator.ui.StockRun'
+	classpath = sourceSets.main.runtimeClasspath
+}
+
+defaultTasks 'clean', 'test', 'jacocoTestReport', 'runui'
